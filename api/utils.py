@@ -19,7 +19,7 @@ def start_new_thread(function):
         t = Thread(target=function, args=args, kwargs=kwargs)
         t.daemon = True
         t.start()
-    return decorator()
+    return decorator
 
 
 def run_thread_pool():
@@ -116,8 +116,8 @@ class DataExtractor:
         logging.info(f'title info found')
         return title_info
 
+    # @start_new_thread
     def start(self):
-        print('started')
         total_title_count = 0
         title_pages = []
         while total_title_count < self.max_movies:
@@ -129,7 +129,9 @@ class DataExtractor:
                 break
             title_pages.extend([self._extract_movie_info(requests.get(BASE_URL + title)) for title in titles])
             total_title_count += len(titles)
-        self.task_instance.result_json = json.dumps(title_pages, ensure_ascii=False)
+        # self.task_instance.result_json = json.dumps(title_pages, ensure_ascii=False)
+        self.task_instance.result_json = title_pages
+        self.task_instance.status = 'Completed'
         self.task_instance.save()
         connection.close()
         # with open('result.json', 'w', encoding='utf-8') as result_json:

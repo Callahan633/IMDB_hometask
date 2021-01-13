@@ -1,10 +1,9 @@
 import logging
 
 from rest_framework import serializers
-from django.forms.models import model_to_dict
 
 from .models import Task
-from .enums import TITLE_TYPES, BASE_URL
+from .enums import TITLE_TYPES
 
 
 logger = logging.getLogger('django')
@@ -22,9 +21,6 @@ class CreateTaskSerializer(serializers.ModelSerializer):
                                              genres=self._genres_extractor(),
                                              user_rating=self._user_rating_extractor(),
                                              countries=self._country_extractor())
-        task_dict = model_to_dict(task, fields=['title_types', 'release_date', 'genres', 'user_rating', 'countries'])
-        task.link = BASE_URL + '/search/title/?' + '&'.join([key + '=' + value for key, value in task_dict.items()]) + '&view=simple&count=250'
-        task.save()
         return task
 
     def _title_types_extractor(self):
@@ -35,7 +31,7 @@ class CreateTaskSerializer(serializers.ModelSerializer):
                 for item in title_types:
                     if item == key:
                         title_types_list.append(value)
-                logger.debug(f"Found title_types: {','.join(title_types_list)}")
+            logger.debug(f"Found title_types: {','.join(title_types_list)}")
             return ','.join(title_types_list)
         except Exception as e:
             logger.error(e)
@@ -75,7 +71,7 @@ class CreateTaskSerializer(serializers.ModelSerializer):
     def _country_extractor(self):
         try:
             countries = self.context['request'].data['countries'].split(',')
-            return ''  # TODO: Unmock this
+            return 'cn,us'  # TODO: Unmock this
         except Exception as e:
             logger.error(e)
         return ''
@@ -86,4 +82,3 @@ class CheckTaskStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ('status', 'link', 'result_json')
-
